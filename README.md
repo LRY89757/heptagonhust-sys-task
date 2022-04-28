@@ -145,3 +145,4 @@ data
 2. RTFSC，在开始写代码之前，应当清楚每一份文件中的代码的作用，包括Makefile
 3. STFW，使用英文查询没有想明白的问题
 4. 如果打算系统性地了解和学习HPC，可参考[七边形学习路线]( https://heptagonhust.github.io/HPC-roadmap/)
+
