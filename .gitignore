@@ -1,0 +1,40 @@
+# Prerequisites
+*.d
+
+# Compiled Object files
+*.slo
+*.lo
+*.o
+*.obj
+
+# Precompiled Headers
+*.gch
+*.pch
+
+# Compiled Dynamic libraries
+*.so
+*.dylib
+*.dll
+
+# Fortran module files
+*.mod
+*.smod
+
+# Compiled Static libraries
+*.lai
+*.la
+*.a
+*.lib
+
+# Executables
+*.exe
+*.out
+*.app
+task1-multi-thread/LearnThread/a.out
+task1-multi-thread/LearnThread/helloworld
+task1-multi-thread/LearnThread/thread1
+task1-multi-thread/LearnThread/thread2
+task1-multi-thread/LearnThread/thread3
+task1-multi-thread/mandelbrot
+# task3-gemm/fetch_data.sh
+*.ppm
