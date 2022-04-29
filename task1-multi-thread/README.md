@@ -27,3 +27,58 @@ Wrote image file mandelbrot-thread.ppm
                                 (3.74x speedup from 8 threads)
 ```
 
+
+看了看可以优化的地方，当前我使用的是8个线程，每个线程恒定计算1200/8=150高度的块，然后经过计时发现确实会有一些问题，因为这样分配的话图形本身按照高度分是不均匀的，最上面的部分和最下面的部分对应线程计算起来比较快，但是其他线程计算起来就比较慢，计算的时间对比如下(5次)：
+```shell
+lry@ubuntu ~/p/r/task1-multi-thread (main)> ./mandelbrot --view 1
+[mandelbrot serial]:            [369.226] ms
+Wrote image file mandelbrot-serial.ppm
+the thread 0 cost time is [6.075] ms
+the thread 7 cost time is [19.220] ms
+the thread 1 cost time is [38.152] ms
+the thread 6 cost time is [56.823] ms
+the thread 2 cost time is [85.779] ms
+the thread 5 cost time is [101.298] ms
+the thread 3 cost time is [115.834] ms
+the thread 4 cost time is [116.928] ms
+the thread 7 cost time is [15.709] ms
+the thread 0 cost time is [19.871] ms
+the thread 6 cost time is [52.994] ms
+the thread 5 cost time is [70.359] ms
+the thread 1 cost time is [71.212] ms
+the thread 4 cost time is [104.420] ms
+the thread 2 cost time is [106.728] ms
+the thread 3 cost time is [114.976] ms
+the thread 0 cost time is [8.359] ms
+the thread 7 cost time is [18.413] ms
+the thread 1 cost time is [48.157] ms
+the thread 6 cost time is [49.016] ms
+the thread 5 cost time is [91.930] ms
+the thread 2 cost time is [98.787] ms
+the thread 4 cost time is [99.190] ms
+the thread 3 cost time is [113.434] ms
+the thread 0 cost time is [6.653] ms
+the thread 7 cost time is [7.813] ms
+the thread 1 cost time is [40.324] ms
+the thread 6 cost time is [51.750] ms
+the thread 5 cost time is [73.239] ms
+the thread 2 cost time is [82.452] ms
+the thread 3 cost time is [98.786] ms
+the thread 4 cost time is [101.288] ms
+the thread 0 cost time is [19.368] ms
+the thread 7 cost time is [20.738] ms
+the thread 6 cost time is [33.937] ms
+the thread 1 cost time is [52.120] ms
+the thread 2 cost time is [66.939] ms
+the thread 5 cost time is [73.324] ms
+the thread 3 cost time is [115.438] ms
+the thread 4 cost time is [117.707] ms
+[mandelbrot thread]:            [101.477] ms
+Wrote image file mandelbrot-thread.ppm
+                                (3.64x speedup from 8 threads)
+```
+
+所以这里目前一个我能够想到的思路就是分块的时候按照面积来分好，确定每个线程要计算的高度参数，这个看来还是要理解代码了，不过这个感觉也可以手算出来，只不过这样一来就必须要理解相应的`mandelbrot set`有关详细计算过程了。
+
+
+
