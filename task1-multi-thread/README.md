@@ -80,5 +80,70 @@ Wrote image file mandelbrot-thread.ppm
 
 所以这里目前一个我能够想到的思路就是分块的时候按照面积来分好，确定每个线程要计算的高度参数，这个看来还是要理解代码了，不过这个感觉也可以手算出来，只不过这样一来就必须要理解相应的`mandelbrot set`有关详细计算过程了。
 
+```sh
+lry@ubuntu ~/p/r/task1-multi-thread (main)> make
+/bin/mkdir -p objs/
+g++ -m64 mandelbrotThread.cpp -I../common -Iobjs/ -O3 -std=c++11 -Wall -fPIC -c -o objs/mandelbrotThread.o
+g++ -m64 -I../common -Iobjs/ -O3 -std=c++11 -Wall -fPIC -o mandelbrot objs/main.o objs/mandelbrotSerial.o objs/mandelbrotThread.o objs/ppm.o -lm -lpthread
+lry@ubuntu ~/p/r/task1-multi-thread (main)> ./mandelbrot --view 1
+[mandelbrot serial]:            [370.022] ms
+Wrote image file mandelbrot-serial.ppm
+the thread 0 cost time is [13.554] ms
+the thread 1 cost time is [56.647] ms
+the thread 2 cost time is [88.658] ms
+the thread 3 cost time is [106.280] ms
+the thread 4 cost time is [108.130] ms
+the thread 5 cost time is [80.206] ms
+the thread 6 cost time is [48.519] ms
+the thread 7 cost time is [19.872] ms
+[mandelbrot thread]:            [101.716] ms
+Wrote image file mandelbrot-thread.ppm
+                                (3.64x speedup from 8 threads)
+```
+
+目前发现果然中间高度的线程花费了大多数时间然而0，1，6，7线程几乎没怎么耗时，这个确实是一个瓶颈。
+现如今打算根据以上的时间比例，来优化高度(也就是代码中实现一个固定的数组来告诉每个线程要计算的高度，):
+目前的计算时间比为：
+13:56:88:106:108:80:48:19
+=
+15:60:90:110:110:80:50:20
+=
+3:12:18:22:22:16:10:4(和为107)
+
+107/8=13.675
+
+对应下来：
+0: 0->150*1.8=270  
+1: 150*(1.8-2.6)
+2: 150*(2.6-3.3)
+3: 150*(3.3-4.0)
+4: 150*(4.0-4.7)
+5: 150*(4.7-5.4)
+6: 150*(5.4-6.2)
+7: 150*(6.2-8.0)
+
+0 270 390 495 600 705 810 930 1200
+
+
+
+照以上的划分标准，目前已经能够加速到5.03倍：
+```sh
+lry@ubuntu ~/p/r/task1-multi-thread (main)> ./mandelbrot --view 1
+[mandelbrot serial]:            [369.970] ms
+Wrote image file mandelbrot-serial.ppm
+the thread 0 cost time is [40.645] ms
+the thread 1 cost time is [55.590] ms
+the thread 2 cost time is [68.482] ms
+the thread 3 cost time is [79.670] ms
+the thread 4 cost time is [79.293] ms
+the thread 5 cost time is [73.837] ms
+the thread 6 cost time is [61.428] ms
+the thread 7 cost time is [39.544] ms
+[mandelbrot thread]:            [73.531] ms
+Wrote image file mandelbrot-thread.ppm
+                                (5.03x speedup from 8 threads)
+```
+
+
 
 
