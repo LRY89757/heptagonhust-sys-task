@@ -16,7 +16,8 @@ extern void mandelbrotThread(
     float x0, float y0, float x1, float y1,
     int width, int height,
     int maxIterations,
-    int output[]);
+    int output[],
+    double* threadtime);
 
 extern void writePPMImage(
     int* data,
@@ -143,13 +144,19 @@ int main(int argc, char** argv) {
     // Run the threaded version
     //
 
+    double threadtime[numThreads] = {0.0};
+
     double minThread = 1e30;
     for (int i = 0; i < 5; ++i) {
       memset(output_thread, 0, width * height * sizeof(int));
         double startTime = CycleTimer::currentSeconds();
-        mandelbrotThread(numThreads, x0, y0, x1, y1, width, height, maxIterations, output_thread);
+        mandelbrotThread(numThreads, x0, y0, x1, y1, width, height, maxIterations, output_thread, threadtime);
         double endTime = CycleTimer::currentSeconds();
         minThread = std::min(minThread, endTime - startTime);
+    }
+    for(int idx = 0;idx<numThreads;idx++)
+    {
+        printf("the thread %d cost time is [%.3f] ms\n", idx, threadtime[idx] * 1000 / 5);
     }
 
     printf("[mandelbrot thread]:\t\t[%.3f] ms\n", minThread * 1000);
