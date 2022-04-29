@@ -38,3 +38,6 @@ task1-multi-thread/LearnThread/thread3
 task1-multi-thread/mandelbrot
 # task3-gemm/fetch_data.sh
 *.ppm
+
+# .vscode
+.vscode/
