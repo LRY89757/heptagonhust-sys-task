@@ -12,6 +12,7 @@ typedef struct {
     int* output;
     int threadId;
     int numThreads;
+    double * threadtime;
 } WorkerArgs;
 
 
@@ -36,18 +37,21 @@ void workerThreadStart(WorkerArgs * const args) {
     // half of the image and thread 1 could compute the bottom half.
 
     // printf("Hello world from thread %d\n", args->threadId);
+    int timeassign[] = {0, 270, 390, 495, 600, 705, 810, 930, 1200};
 
-    double startTime = CycleTimer::currentSeconds();
     int idx = args->threadId;
-    int totalRows = args->height / (args->numThreads);
-    int startRow = idx * totalRows;
+    int totalRows = timeassign[idx+1] - timeassign[idx];
+    int startRow = timeassign[idx];
+    // int totalRows = args->height / (args->numThreads);
+    // int startRow = idx * totalRows;
+    double startTime = CycleTimer::currentSeconds();
     mandelbrotSerial(args->x0, args->y0, args->x1, args->y1, args->width, 
                     args->height, startRow, totalRows, args->maxIterations, args->output);
     // mandelbrotSerial(args->x0, args->y0, args->x1, args->y1, args->width, 
     //                 args->height, 0, args->height, args->maxIterations, args->output);
     double endTime = CycleTimer::currentSeconds();
+    args->threadtime[idx] += endTime - startTime;
 
-    printf("the thread %d cost time is [%.3f] ms\n", idx, (endTime - startTime) * 1000);
     // std::cout<<endTime - startTime<<std::endl;
     return;
 }
@@ -61,7 +65,7 @@ void mandelbrotThread(
     int numThreads,
     float x0, float y0, float x1, float y1,
     int width, int height,
-    int maxIterations, int output[])
+    int maxIterations, int output[], double* threadtime)
 {
     static constexpr int MAX_THREADS = 32;
 
@@ -89,6 +93,7 @@ void mandelbrotThread(
         args[i].maxIterations = maxIterations;
         args[i].numThreads = numThreads;
         args[i].output = output;
+        args[i].threadtime = threadtime;
       
         args[i].threadId = i;
     }
