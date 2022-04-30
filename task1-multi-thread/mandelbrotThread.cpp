@@ -23,12 +23,6 @@ extern void mandelbrotSerial(
     int maxIterations,
     int output[]);
 
-extern void mandelbrotStepSerial(
-    float x0, float y0, float x1, float y1,
-    int width, int height,
-    int startRow, int step,
-    int maxIterations,
-    int output[]);
 
 //
 // workerThreadStart --
@@ -43,29 +37,15 @@ void workerThreadStart(WorkerArgs * const args) {
     // half of the image and thread 1 could compute the bottom half.
 
     // printf("Hello world from thread %d\n", args->threadId);
-
-    // method 1
-    // int timeassign[] = {0, 270, 390, 495, 600, 705, 810, 930, 1200};
-
-    // int idx = args->threadId;
-    // int totalRows = timeassign[idx+1] - timeassign[idx];
-    // int startRow = timeassign[idx];
-    // // int totalRows = args->height / (args->numThreads);
-    // // int startRow = idx * totalRows;
-    // double startTime = CycleTimer::currentSeconds();
-    // mandelbrotSerial(args->x0, args->y0, args->x1, args->y1, args->width, 
-    //                 args->height, startRow, totalRows, args->maxIterations, args->output);
-    // // mandelbrotSerial(args->x0, args->y0, args->x1, args->y1, args->width, 
-    // //                 args->height, 0, args->height, args->maxIterations, args->output);
-    // double endTime = CycleTimer::currentSeconds();
-
-
-    // method 2:thread i computes all the rows which is k * numThread + i
     int idx = args->threadId;
     double startTime = CycleTimer::currentSeconds();
-    mandelbrotStepSerial(args->x0, args->y0, args->x1, args->y1,
-    args->width, args->height, args->threadId, args->numThreads, args->maxIterations, args->output);
+    for(int i = idx; i<args->height;i+=args->numThreads)
+    {
+        mandelbrotSerial(args->x0, args->y0, args->x1, args->y1, args->width, 
+                    args->height, i, 1, args->maxIterations, args->output);
+    }
     double endTime = CycleTimer::currentSeconds();
+
     args->threadtime[idx] += endTime - startTime;
     // std::cout<<endTime - startTime<<std::endl;
     return;
