@@ -40,5 +40,7 @@ task1-multi-thread/mandelbrot
 *.ppm
 task2-simd/myexp
 
+Reference/
+
 # .vscode
 .vscode/
