@@ -251,57 +251,62 @@ void clampedExpVector(float* values, int* exponents, float* output, int N) {
   //
   __cs149_vec_float x;
   __cs149_vec_int y;
-  __cs149_vec_float result = _cs149_vset_float(1.f);
   __cs149_vec_float max = _cs149_vset_float(9.999999f);
   __cs149_vec_int zero = _cs149_vset_int(0);
   __cs149_vec_int one = _cs149_vset_int(1); // 设定全1项，到时候将该减的exp自减1
+  __cs149_vec_float one_f = _cs149_vset_float(1.f); // 设定全1项，到时候将该减的exp自减1
   __cs149_mask maskIsNegative, maskAll, maskIsExpZero, maskIsMax;
-  for(int i = 0;i<N;i+=VECTOR_WIDTH)
+  int i; 
+  for(i = 0;i<N;i+=VECTOR_WIDTH)
   {
+
+    __cs149_vec_float result = _cs149_vset_float(1.f);
     maskAll = _cs149_init_ones();  // 存储单词vector的向量
     maskIsNegative = _cs149_init_ones(0);  // 用来存储我们的所有当前的非零项
-    maskIsExpZero = _cs149_init_ones(0);  // 用来存储我们的所有当前的exp中的等于零的部分，这部分结果永远是1
+    // maskIsExpZero = _cs149_init_ones(0);  // 用来存储我们的所有当前的exp中的等于零的部分，这部分结果永远是1
     maskIsMax = _cs149_init_ones(0); // 用来存储我们当前大于float99的部分
 
     _cs149_vload_float(x, values+i, maskAll);
     _cs149_vload_int(y, exponents+i, maskAll);
 
-    _cs149_veq_int(maskIsExpZero, y, zero, maskAll); // 先得出结果是1的部分
-    _cs149_veq_int(maskIsNegative, y, zero, maskAll); // 先得出结果是1的部分
+    // _cs149_veq_int(maskIsExpZero, y, zero, maskAll); // 先得出结果是1的部分
+    _cs149_vgt_int(maskIsNegative, y, zero, maskAll); // 先得出结果是1的部分
 
+    // _cs149_vmove_float(result, one_f, maskIsExpZero)// 将等于1的提前移进去
 
     while(_cs149_cntbits(maskIsNegative))
     {
-      //一方面大于float的部分不用计算相应的值，然后另一方面y等于0的部分也不用计算
+      // maskIsNegative =  _cs149_mask_and(maskIsNegative, maskIsMax);  // 想想这个还是放到第一行比较合适
+      //一方面大于float99的部分不用计算相应的值(设为0就好)，然后另一方面y等于0的部分也不用计算
       _cs149_vmult_float(result, result, x, maskIsNegative);
 
-      _cs149_vsub_int(y, y, one, maskIsNegative);  // 改自减的减一
+      _cs149_vsub_int(y, y, one, maskIsNegative);  // 该自减的减一
       
       _cs149_vgt_float(maskIsMax, result, max, maskAll); // 将当前大于float99的部分更新出来防止重复计算
 
-      _cs149_veq_int(maskIsNegative, y, zero, maskAll); // 更新maskIsNegative
+      _cs149_vset_int(y, 0, maskIsMax); // 将大于float99的y对应值设为0
 
-      maskIsMax = _cs149_mask_not(maskIsMax);
-      maskIsNegative =  _cs149_mask_and(maskIsNegative, maskIsMax);
+      _cs149_vgt_int(maskIsNegative, y, zero, maskAll); // 更新maskIsNegative
+
+      _cs149_vmove_float(result, max, maskIsMax);// 将大于float99的移进去
+      // maskIsMax = _cs149_mask_not(maskIsMax);
+      // maskIsNegative =  _cs149_mask_and(maskIsNegative, maskIsMax);
       // maskIsMax = _cs149_mask_not(maskIsMax); 这行代码没必要，反正下一个循环就又更新了，大不了最后跳出循环要用的时候重算一次就行
     }
 
-    _cs149_vgt_float(maskIsMax, result, max, maskAll); // 将当前大于float99的部分更新出来防止重复计算
+    // maskIsNegative =  _cs149_mask_and(maskIsNegative, maskIsMax);
+    // _cs149_vgt_float(maskIsMax, result, max, maskAll); // 将当前大于float99的部分更新出来防止重复计算
+    // _cs149_vmove_float(result, max, maskIsMax);// 将大于float99的移进去
 
-    _cs149_vmove_float(result, max, maskIsMax);// 将大于float99的移进去
-
-    
-
-    
-
-
-
-
-
+    // Write results back to memory
+    _cs149_vstore_float(output+i, result, maskAll);
   }
-  
 
-  
+  if(i!=N)
+  {
+    i -= VECTOR_WIDTH;
+    clampedExpSerial(values + i, exponents + i, output + i, N - i);
+  }
 }
 
 // returns the sum of all elements in values
