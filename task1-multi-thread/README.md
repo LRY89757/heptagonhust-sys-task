@@ -146,4 +146,43 @@ Wrote image file mandelbrot-thread.ppm
 
 
 
+刚刚又看了看样本的分配同样还是不均匀，但是好了一些，同时需要考虑的是即使这么做会有效果，还有第二个分型需要去考虑计算速度，所以这个还是需要进一步的思考优化。
+
+## 2022/4/30  Finished!
+参考了有关文档的解释以及有关资料，目前最新的进展已经完美加速两个进程了!
+大致思路其实很简单，因为相邻像素得亮度是均匀的，所以计算的开销也是类似的，所以就严格将图像块每个部分都细分为8份进行运算即可，这样一来就非常easy了：
+```sh
+lry@ubuntu ~/p/r/task1-multi-thread (main)> ./mandelbrot --view 1
+[mandelbrot serial]:            [408.423] ms
+Wrote image file mandelbrot-serial.ppm
+the thread 0 cost time is [51.934] ms
+the thread 1 cost time is [56.738] ms
+the thread 2 cost time is [52.428] ms
+the thread 3 cost time is [56.523] ms
+the thread 4 cost time is [53.968] ms
+the thread 5 cost time is [53.042] ms
+the thread 6 cost time is [52.898] ms
+the thread 7 cost time is [55.334] ms
+[mandelbrot thread]:            [60.264] ms
+Wrote image file mandelbrot-thread.ppm
+                                (6.78x speedup from 8 threads)
+lry@ubuntu ~/p/r/task1-multi-thread (main)> ./mandelbrot --view 2
+[mandelbrot serial]:            [255.144] ms
+Wrote image file mandelbrot-serial.ppm
+the thread 0 cost time is [32.793] ms
+the thread 1 cost time is [33.909] ms
+the thread 2 cost time is [33.029] ms
+the thread 3 cost time is [33.572] ms
+the thread 4 cost time is [35.237] ms
+the thread 5 cost time is [36.303] ms
+the thread 6 cost time is [32.252] ms
+the thread 7 cost time is [36.353] ms
+[mandelbrot thread]:            [40.296] ms
+Wrote image file mandelbrot-thread.ppm
+                                (6.33x speedup from 8 threads)
+```
+
+完结撒花！
+
+
 
