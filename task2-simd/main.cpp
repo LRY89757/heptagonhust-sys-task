@@ -126,7 +126,8 @@ void initValue(float* values, int* exponents, float* output, float* gold, unsign
 bool verifyResult(float* values, int* exponents, float* output, float* gold, int N) {
   int incorrect = -1;
   float epsilon = 0.00001;
-  for (int i=0; i<N+VECTOR_WIDTH; i++) {
+  // for (int i=0; i<N+VECTOR_WIDTH; i++) {
+  for (int i=0; i<N; i++) {
     if ( abs(output[i] - gold[i]) > epsilon ) {
       incorrect = i;
       break;
@@ -328,10 +329,28 @@ float arraySumVector(float* values, int N) {
   // CS149 STUDENTS TODO: Implement your vectorized version of arraySumSerial here
   //
   
-  for (int i=0; i<N; i+=VECTOR_WIDTH) {
+  __cs149_mask maskAll = _cs149_init_ones();
+  __cs149_vec_float sum_ = _cs149_vset_float(0.f);
+  int i;
+  float ans = 0, value[VECTOR_WIDTH];
+  for (i=0; i<N; i+=VECTOR_WIDTH) {
 
+    // load the data
+    __cs149_vec_float x;
+    _cs149_vload_float(x, values+i, maskAll);
+
+    // Add the result
+    _cs149_vadd_float(sum_, sum_, x, maskAll);
   }
 
-  return 0.0;
+  _cs149_vstore_float(value, sum_, maskAll);
+
+  if(i != N)
+  {
+    i -= VECTOR_WIDTH;
+    ans = arraySumSerial(values+i, N-i);
+  }
+
+  return ans + arraySumSerial(value, VECTOR_WIDTH);
 }
 
