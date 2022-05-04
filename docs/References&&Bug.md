@@ -1,9 +1,10 @@
 ## 参考链接(自制版)
 * 2021秋季招新试题：https://github.com/ikitsuchi/kmeans
-* 别人写的答案：https://github.com/PKUFlyingPig/asst1/commit/21a5c2abf6679fbae862b6d1041e85527117fc29
+* 别人写的答案：https://github.com/PKUFlyingPig/asst1/
 * 多线程编程：https://shengyu7697.github.io/std-thread/
 * 多线程编程：https://zhuanlan.zhihu.com/p/389140084
 * 多线程编程(详细版):https://blog.csdn.net/sevenjoin/article/details/82187127
+* `std::mutex`:https://shengyu7697.github.io/std-mutex/
 
 
 
