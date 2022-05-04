@@ -39,7 +39,9 @@ task1-multi-thread/mandelbrot
 # task3-gemm/fetch_data.sh
 *.ppm
 task2-simd/myexp
-
+task3-gemm/data.tar.gz
+task3-gemm/data/
+task3-gemm/gemm
 Reference/
 
 # .vscode
