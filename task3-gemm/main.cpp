@@ -25,7 +25,7 @@ const int scale[] = {256, 512, 1024, 2048};
 const string data_path("./data/");
 
 void multikernel(vec &c, vec&a, 
-                    vec*b, int row, int col, const int&size);
+                    vector<vec> b, int row, int col, const int&size);
 
 void Gemm(const int &size, vec &a, vec &b, vec &c) {
     // for(int i = 0; i < size; i++)
@@ -33,7 +33,11 @@ void Gemm(const int &size, vec &a, vec &b, vec &c) {
     //         for(int k = 0; k < size; k++)
     //             c[i*size+j] += a[i*size+k] * b[k*size+j];
 
-    vec tr[4];
+    // vec tr[4];
+    vector<vec> tr(4, vec(size, 0));
+    // int tr[4][size];
+    // vec c(nelems, 0);
+
     // for(int i = 0;i<size;i+=4)
     // {
     //     for(int j = 0;j<size;j+=4)
@@ -46,10 +50,10 @@ void Gemm(const int &size, vec &a, vec &b, vec &c) {
         // 先取出4列
         for(int i = 0;i<size;i++)
         {
-            tr[0][j] = b[i*size+j];
-            tr[1][j] = b[i*size+j+1];
-            tr[2][j] = b[i*size+j+2];
-            tr[3][j] = b[i*size+j+3];
+            tr[0][i] = b[i*size+j];
+            tr[1][i] = b[i*size+j+1];
+            tr[2][i] = b[i*size+j+2];
+            tr[3][i] = b[i*size+j+3];
         }
 
         // 目前需要一个kernel计算的是a中的4行和b中刚刚取出的4列
@@ -64,7 +68,7 @@ void Gemm(const int &size, vec &a, vec &b, vec &c) {
 }
 
 void multikernel(vec &c, vec&a, 
-                    vec*b, int row, int col, const int&size)
+                    vector<vec> b, int row, int col, const int&size)
 {
     register int t[4][4] = {0};  // t[r][c]负责存第r行乘以对应列的答案
 
@@ -74,7 +78,7 @@ void multikernel(vec &c, vec&a,
         {
             for(int c=0;c<4;c++)
             {
-                t[r][c] += a[((row+r)*size) + i] * b[c][i];
+               t[r][c] += a[((row+r)*size) + i] * b[c][i];
             }
         }
         // for(int idx = 0;idx<16;idx++)
@@ -86,6 +90,8 @@ void multikernel(vec &c, vec&a,
     for(int r=0;r<4;r++)
         for(int cc = 0;cc<4;cc++)
             c[((row+r)*size)+col+cc] = t[r][cc];
+
+    // cout<<row<<","<<col<<"\n";
 }
 
 

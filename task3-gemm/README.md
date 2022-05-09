@@ -39,3 +39,24 @@ Passed, dataset: size 2048
 
 反正可以整除
 
+笑死按照上面方法优化反而变慢了：
+```sh
+lry@ubuntu ~/p/r/task3-gemm (main)> make run
+./gemm
+Running, dataset: size 256
+time spent: 112962us
+Passed, dataset: size 256
+
+Running, dataset: size 512
+time spent: 867932us
+Passed, dataset: size 512
+
+Running, dataset: size 1024
+time spent: 6.94441e+06us
+Passed, dataset: size 1024
+
+Running, dataset: size 2048
+time spent: 5.48987e+07us
+Passed, dataset: size 2048
+```
+
