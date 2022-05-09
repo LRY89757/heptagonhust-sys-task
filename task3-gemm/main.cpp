@@ -24,12 +24,70 @@ using vec = vector<int>;
 const int scale[] = {256, 512, 1024, 2048};
 const string data_path("./data/");
 
+void multikernel(vec &c, vec&a, 
+                    vec*b, int row, int col, const int&size);
+
 void Gemm(const int &size, vec &a, vec &b, vec &c) {
-    for(int i = 0; i < size; i++)
-        for(int j = 0; j < size; j++)
-            for(int k = 0; k < size; k++)
-                c[i*size+j] += a[i*size+k] * b[k*size+j];
+    // for(int i = 0; i < size; i++)
+    //     for(int j = 0; j < size; j++)
+    //         for(int k = 0; k < size; k++)
+    //             c[i*size+j] += a[i*size+k] * b[k*size+j];
+
+    vec tr[4];
+    // for(int i = 0;i<size;i+=4)
+    // {
+    //     for(int j = 0;j<size;j+=4)
+    //     {
+    //         ;
+    //     }
+    // }
+    for(int j = 0;j<size;j+=4)
+    {
+        // 先取出4列
+        for(int i = 0;i<size;i++)
+        {
+            tr[0][j] = b[i*size+j];
+            tr[1][j] = b[i*size+j+1];
+            tr[2][j] = b[i*size+j+2];
+            tr[3][j] = b[i*size+j+3];
+        }
+
+        // 目前需要一个kernel计算的是a中的4行和b中刚刚取出的4列
+        for(int k = 0;k<size;k+=4)
+        // for循环来遍历了所有的a中的4行
+        {
+            multikernel(c, a, tr, k, j, size); // 注意这里是a中的4行和tr中4行来相乘
+        }
+
+    }
+
 }
+
+void multikernel(vec &c, vec&a, 
+                    vec*b, int row, int col, const int&size)
+{
+    register int t[4][4] = {0};  // t[r][c]负责存第r行乘以对应列的答案
+
+    for(int i = 0;i<size;i++)
+    {
+        for(int r=0;r<4;r++)
+        {
+            for(int c=0;c<4;c++)
+            {
+                t[r][c] += a[((row+r)*size) + i] * b[c][i];
+            }
+        }
+        // for(int idx = 0;idx<16;idx++)
+        // {
+        //     t[idx] += 
+        // }
+    }
+
+    for(int r=0;r<4;r++)
+        for(int cc = 0;cc<4;cc++)
+            c[((row+r)*size)+col+cc] = t[r][cc];
+}
+
 
 void CheckResult(const vec &c, const string &result_path) {
     ifstream file_result(result_path);
