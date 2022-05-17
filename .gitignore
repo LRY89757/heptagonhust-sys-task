@@ -43,6 +43,7 @@ task3-gemm/data.tar.gz
 task3-gemm/data/
 task3-gemm/gemm
 Reference/
+task3-gemm/cumain
 
 # .vscode
 .vscode/
