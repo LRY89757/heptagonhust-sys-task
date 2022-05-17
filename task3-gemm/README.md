@@ -1,4 +1,7 @@
 # Main idea
+
+## Reference
+### Cuda
 初步思路是使用Cuda来加速这个矩阵。
 * Linux C++与Cuda混合编程：https://blog.csdn.net/baishuiniyaonulia/article/details/120675337
 * Cuda C++ demo:https://blog.csdn.net/qq_40283970/article/details/105893038
@@ -8,6 +11,7 @@
 
 Cuda优化的过程文档看[这里](./READMECuda.md)
 
+### CPU
 * 也许使用访存和有关C++知识来写这道题，可以参考如下链接:
   * https://blog.csdn.net/artorias123/article/details/86527456
   * https://www.delftstack.com/zh/howto/cpp/matrix-multiplication-in-cpp/
@@ -27,6 +31,11 @@ Cuda优化的过程文档看[这里](./READMECuda.md)
   * 
 
   
+## BaseLine
+
+设备信息：model name	: Intel(R) Core(TM) i9-10900X CPU @ 3.70GHz
+
+cpu更为详细信息请看[cpuinfo](./cpuinfo.log)
 
 原始效果：
 ```sh
