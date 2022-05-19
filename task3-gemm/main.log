@@ -27,3 +27,64 @@ time spent: 1.31532e+07us
 time spent: 2.46927e+07us
 Passed, dataset: size 2048
 
+
+#pragma omp parallel for:
+
+lry@ubuntu ~/p/r/task3-gemm (main)> make && make run
+g++ main.cpp -o gemm -fopenmp -O0 -Wall -Werror -std=c++11 
+./gemm
+Running, dataset: size 256
+time spent: 29445us
+time spent: 19104us
+time spent: 41795us
+Passed, dataset: size 256
+
+Running, dataset: size 512
+time spent: 338546us
+time spent: 34578us
+time spent: 371557us
+Passed, dataset: size 512
+
+Running, dataset: size 1024
+time spent: 1.96832e+06us
+time spent: 287596us
+time spent: 3.25417e+06us
+Passed, dataset: size 1024
+
+Running, dataset: size 2048
+time spent: 1.54474e+07us
+time spent: 1.8487e+06us
+time spent: 4.86123e+07us
+Passed, dataset: size 2048
+
+
+
+#pragma omp parallel for schedule(dynamic):
+
+lry@ubuntu ~/p/r/task3-gemm (main)> make && make run
+g++ main.cpp -o gemm -fopenmp -O0 -Wall -Werror -std=c++11 
+./gemm
+Running, dataset: size 256
+time spent: 54244us
+time spent: 17803us
+time spent: 55513us
+Passed, dataset: size 256
+
+Running, dataset: size 512
+time spent: 235596us
+time spent: 32592us
+time spent: 335761us
+Passed, dataset: size 512
+
+Running, dataset: size 1024
+time spent: 1.9541e+06us
+time spent: 233204us
+time spent: 3.1404e+06us
+Passed, dataset: size 1024
+
+Running, dataset: size 2048
+time spent: 1.65397e+07us
+time spent: 1.44036e+06us
+time spent: 4.30384e+07us
+Passed, dataset: size 2048
+
