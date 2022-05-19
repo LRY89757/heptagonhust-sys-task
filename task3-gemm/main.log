@@ -1,0 +1,29 @@
+./gemm
+Running, dataset: size 256
+time spent: 111408us
+time spent: 35256us
+time spent: 43712us
+time spent: 85853us
+Passed, dataset: size 256
+
+Running, dataset: size 512
+time spent: 1.41923e+06us
+time spent: 260336us
+time spent: 225407us
+time spent: 312949us
+Passed, dataset: size 512
+
+Running, dataset: size 1024
+time spent: 6.87085e+07us
+time spent: 1.97686e+06us
+time spent: 1.82766e+06us
+time spent: 3.18105e+06us
+Passed, dataset: size 1024
+
+Running, dataset: size 2048
+time spent: 5.43038e+08us
+time spent: 1.55607e+07us
+time spent: 1.31532e+07us
+time spent: 2.46927e+07us
+Passed, dataset: size 2048
+
