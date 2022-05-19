@@ -18,6 +18,7 @@ Cuda优化的过程文档看[这里](./READMECuda.md)
   * https://www.google.com/search?q=%E7%9F%A9%E9%98%B5%E7%9B%B8%E4%B9%98%E4%BC%98%E5%8C%96C%2B%2B&oq=%E7%9F%A9%E9%98%B5%E7%9B%B8%E4%B9%98%E4%BC%98%E5%8C%96C%2B%2B&aqs=chrome..69i57j35i39l2j0i512j46i199i465i512j0i512l2j46i199i465i512j0i512l2.10761j0j7&sourceid=chrome&ie=UTF-8
 
 * 关于openmp的一些简单了解：https://blog.csdn.net/dcrmg/article/details/53862448
+* Linux查看cpu缓存：https://blog.csdn.net/weixin_30741285/article/details/116730720
 
 别人写的矩阵相乘实例：
   * https://github.com/NJU-TJL/OpenMP-MPI_Labs/tree/main/Lab01
@@ -28,13 +29,29 @@ Cuda优化的过程文档看[这里](./READMECuda.md)
     * 有一说一这个确实很赞
   * 如何对矩阵相乘进行优化, 主要从这之中学到了非常多的名词与一些专业术语的解释：https://renzibei.com/2021/06/30/optimize-gemm/
   * 矩阵优化常见思路：https://blog.csdn.net/wwxy1995/article/details/114762108
+  * UCSB的讲义：https://sites.cs.ucsb.edu/~tyang/class/240a17/slides/Cache3.pdf
+  * 优化矩阵相乘论文Anatomy of High-Performance Matrix Multiplication: https://www.cs.utexas.edu/users/pingali/CS378/2008sp/papers/gotoPaper.pdf
+* 矩阵分块相乘分析优化：
+  * 理解矩阵分块相乘的优化：https://zhuanlan.zhihu.com/p/342923482
+  * 矩阵乘法分块优化，含具体数据分析：https://blog.csdn.net/weixin_40673608/article/details/88135041
   * 
 
   
 ## BaseLine
 
 设备信息：model name	: Intel(R) Core(TM) i9-10900X CPU @ 3.70GHz
-
+Model name:                      Intel(R) Core(TM) i9-10900X CPU @ 3.70GHz
+Stepping:                        7
+CPU MHz:                         4299.999
+CPU max MHz:                     4700.0000
+CPU min MHz:                     1200.0000
+BogoMIPS:                        7399.70
+Virtualization:                  VT-x
+**L1d cache:                       320 KiB**
+**L1i cache:                       320 KiB**
+**L2 cache:                        10 MiB**
+**L3 cache:                        19.3 MiB**
+NUMA node0 CPU(s):               0-19
 cpu更为详细信息请看[cpuinfo](./cpuinfo.log)
 
 原始效果：
@@ -159,6 +176,8 @@ Passed, dataset: size 2048
 
 
 
+## 2022.5.17
+
 偶然看到的这类运算可以优化的点：
 > 有几个优化点，一个是对外层循环做tile，利用访问内存的局部性尽量多利用缓存中现有的数据进行计算，通常对i和j做blocking，第二是对外层循环并行化，第三是内层循环可以向量化，硬件通常提供了fma，也就是y=a*b+c的指令，最后在向量化的基础上还可以unroll，减少循环次数
 * https://blog.csdn.net/wwxy1995/article/details/114762108
@@ -192,3 +211,54 @@ Passed, dataset: size 2048
 * 使用a中4行4行的取出来乘以b中的4列，结果使用`register`来存储
 * 由于每个循环最内部计算的相当于4×4的矩阵，所以这里同样使用一个临时变量来存储需要乘的8个变量，这样一来计算访存比达到16/8=2/1，当然这样一来还有优化空间，访存比个人认为还有必要提高
 * 另外矩阵分块cache blocking还有待优化。
+
+
+* 进一步打算：
+  * 访存继续优化，根据cpu本地的cache Blocking彻底分块优化
+    *  cache Blocking 思考了下似乎这里不用分块，因为似乎1024？
+       <!-- 不太确定，可以问问老师到时候 -->
+    *  Packing
+  * 使用SIMD，OPENMP
+    *  也许可以使用汇编写（汇编、计系课本有
+    *  
+  * 探索下GPU的加速与缓存
+  * 可以看看别人都是怎么实现的。
+
+
+目前测试了分块的效果以及相应的各类cuda操作，cuda部分先不提，主要提提关于分块的效果
+目前的速度上差不多**仅用访存**对于1024规模的矩阵最多加速了30倍以上，对于2048规模的矩阵可以加速大概30~35倍
+```sh
+./gemm
+Running, dataset: size 256
+time spent: 111408us
+time spent: 35256us
+time spent: 43712us
+time spent: 85853us
+Passed, dataset: size 256
+
+Running, dataset: size 512
+time spent: 1.41923e+06us
+time spent: 260336us
+time spent: 225407us
+time spent: 312949us
+Passed, dataset: size 512
+
+Running, dataset: size 1024
+time spent: 6.87085e+07us
+time spent: 1.97686e+06us
+time spent: 1.82766e+06us
+time spent: 3.18105e+06us
+Passed, dataset: size 1024
+
+Running, dataset: size 2048
+time spent: 5.43038e+08us
+time spent: 1.55607e+07us
+time spent: 1.31532e+07us
+time spent: 2.46927e+07us
+Passed, dataset: size 2048
+
+
+
+```
+
+但是这里发现矩阵分块的效果并没有之前提出的方法效果好，这里不是非常清楚原因是什么，可能是缓存的读取复用度？或者应该是直接访问的错误？总之这里出现了很大的问题，也就是内部的kernel相乘还有待优化或许还可以使用之前提到的方式，不过这样一来个人认为矩阵分块的作用就没有那么大了
