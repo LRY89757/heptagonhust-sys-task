@@ -13,6 +13,8 @@
 #include <immintrin.h>
 #include <cstring>
 
+#define NUM_THREADS 20
+
 #define PRINT_TIME(code) do { \
     auto start = system_clock::now(); \
     code \
@@ -124,7 +126,7 @@ void Gemmm(const int &size, int* a, int *b, int *c) {
     // vec c(nelems, 0);
 
     int blocksize = 4;
-    #pragma omp parallel for
+    #pragma omp parallel for schedule(dynamic)
     for(int j = 0;j<size;j+=blocksize)
     {
         // 先取出4列
@@ -274,6 +276,7 @@ inline void multikernel1(int *c, int *a,
         t8(0), t9(0), t10(0), t11(0),
         t12(0), t13(0), t14(0), t15(0);
 
+    // #pragma omp parallel for schedule(dynamic) //这里加了反而变慢了些
     for(int i = 0;i<size;i+=4)
     {
         t0=t1=t2=t3=t4=t5=t6=t7=t8=t9=t10=t11=t12=t13=t14=t15=0;
@@ -419,11 +422,12 @@ void Benchmark(const int &size) {
     for(int i = 0; i < nelems; i++) {
         file_b >> b[i];
         intb[i] = b[i];
-        intc[i] = 0;
     }
 
-    PRINT_TIME(
-        GemmOrigin(size, a, b, c););
+    memset(intc, 0, nelems*sizeof(int));
+
+    // PRINT_TIME(
+    //     GemmOrigin(size, a, b, c););
 
     memset(intc, 0, nelems*sizeof(int));
 

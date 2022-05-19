@@ -262,3 +262,39 @@ Passed, dataset: size 2048
 ```
 
 但是这里发现矩阵分块的效果并没有之前提出的方法效果好，这里不是非常清楚原因是什么，可能是缓存的读取复用度？或者应该是直接访问的错误？总之这里出现了很大的问题，也就是内部的kernel相乘还有待优化或许还可以使用之前提到的方式，不过这样一来个人认为矩阵分块的作用就没有那么大了
+
+
+仅仅使用了openmp之后，发现就加了一行命令果然提速了不少, 目前总共来说对于2048的矩阵提高了377倍：
+```sh
+#pragma omp parallel for schedule(dynamic):
+
+lry@ubuntu ~/p/r/task3-gemm (main)> make && make run
+g++ main.cpp -o gemm -fopenmp -O0 -Wall -Werror -std=c++11 
+./gemm
+Running, dataset: size 256
+time spent: 54244us
+time spent: 17803us
+time spent: 55513us
+Passed, dataset: size 256
+
+Running, dataset: size 512
+time spent: 235596us
+time spent: 32592us
+time spent: 335761us
+Passed, dataset: size 512
+
+Running, dataset: size 1024
+time spent: 1.9541e+06us
+time spent: 233204us
+time spent: 3.1404e+06us
+Passed, dataset: size 1024
+
+Running, dataset: size 2048
+time spent: 1.65397e+07us
+time spent: 1.44036e+06us
+time spent: 4.30384e+07us
+Passed, dataset: size 2048
+```
+
+但是这里对于openmp的使用绝对不到位，因为这里读取的内存还是共享的，所以说还是线程间读取缓存的时候绝对访存的速度就下降了，所以进一步肯定可以进一步继续优化。
+
