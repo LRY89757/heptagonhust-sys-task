@@ -124,6 +124,7 @@ void Gemmm(const int &size, int* a, int *b, int *c) {
     // vec c(nelems, 0);
 
     int blocksize = 4;
+    #pragma omp parallel for
     for(int j = 0;j<size;j+=blocksize)
     {
         // 先取出4列
