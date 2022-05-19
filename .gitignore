@@ -44,6 +44,9 @@ task3-gemm/data/
 task3-gemm/gemm
 Reference/
 task3-gemm/cumain
+cache.log
+testcache.cpp
+task3-gemm/naive
 
 # .vscode
 .vscode/
