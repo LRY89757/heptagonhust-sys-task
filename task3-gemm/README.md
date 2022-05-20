@@ -297,4 +297,86 @@ Passed, dataset: size 2048
 ```
 
 但是这里对于openmp的使用绝对不到位，因为这里读取的内存还是共享的，所以说还是线程间读取缓存的时候绝对访存的速度就下降了，所以进一步肯定可以进一步继续优化。
+目前的对比结果：
+```sh
+lry@ubuntu ~/p/r/task3-gemm (main)> make && make run
+g++ main.cpp -o gemm -fopenmp -O0 -Wall -Werror -std=c++11 
+./gemm
+Running, dataset: size 256
+the origin matrix:
+time spent: 163668us
+the optimized matrix:
+time spent: 16504us
+Passed, dataset: size 256
+
+Running, dataset: size 512
+the origin matrix:
+time spent: 1.38222e+06us
+the optimized matrix:
+time spent: 33839us
+Passed, dataset: size 512
+
+Running, dataset: size 1024
+the origin matrix:
+time spent: 6.57885e+07us
+the optimized matrix:
+time spent: 200592us
+Passed, dataset: size 1024
+
+Running, dataset: size 2048
+the origin matrix:
+time spent: 9.34125e+08us
+the optimized matrix:
+time spent: 1.96578e+06us
+Passed, dataset: size 2048
+
+
+```
+
+刚刚查了查好像目前服务器cpu支持avx512：
+```sh
+lry@ubuntu ~/p/r/task3-gemm (main)> cat /proc/cpuinfo | grep flags
+flags           : fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush dts acpi mmx fxsr sse sse2 ss ht tm pbe syscall nx pdpe1gb rdtscp lm constant_tsc art arch_perfmon pebs bts rep_good nopl xtopology nonstop_tsc cpuid aperfmperf pni pclmulqdq dtes64 monitor ds_cpl vmx est tm2 ssse3 sdbg fma cx16 xtpr pdcm pcid dca sse4_1 sse4_2 x2apic movbe popcnt tsc_deadline_timer aes xsave avx f16c rdrand lahf_lm abm 3dnowprefetch cpuid_fault epb cat_l3 cdp_l3 invpcid_single ssbd mba ibrs ibpb stibp ibrs_enhanced tpr_shadow vnmi flexpriority ept vpid ept_ad fsgsbase tsc_adjust bmi1 avx2 smep bmi2 erms invpcid cqm mpx rdt_a avx512f avx512dq rdseed adx smap clflushopt clwb intel_pt avx512cd avx512bw avx512vl xsaveopt xsavec xgetbv1 xsaves cqm_llc cqm_occup_llc cqm_mbm_total cqm_mbm_local dtherm ida arat pln pts hwp hwp_act_window hwp_epp hwp_pkg_req avx512_vnni md_clear flush_l1d arch_capabilities
+```
+这样一来我们就可以选择使用avx512,另外既然如此我们就可以一次运算求出所有的4×4结果就没必要使用寄存器了，当前的策略有待进一步改进。
+
+
+# 完结撒花！！
+
+加了加AVX指令, 我奇怪地一点是AVX是对于整型数也按照浮点数的计算方式吗?为什么使用AVX指令最后结果会小那么一点点。或者大那么一点点？总之就是会差一点精度，但是速度确实提升的非常大，以下为使用AVX指令和不使用的差别：
+
+```sh
+lry@ubuntu ~/p/r/task3-gemm (main) [2]> make && make run
+g++ main.cpp -o gemm -fopenmp -mavx -mavx2 -mfma -msse -msse2 -msse3 -mavx512bw -mavx512vl -mavx512f -mavx512cd -mavx512dq -O0 -Wall -Werror -std=c++11 
+./gemm
+Running, dataset: size 256
+the optimized matrix:
+time spent: 17935us
+the avx optimized matrix:
+time spent: 8839us
+Passed, dataset: size 256
+
+Running, dataset: size 512
+the optimized matrix:
+time spent: 37948us
+the avx optimized matrix:
+time spent: 14630us
+Passed, dataset: size 512
+
+Running, dataset: size 1024
+the optimized matrix:
+time spent: 197011us
+the avx optimized matrix:
+time spent: 34545us
+Passed, dataset: size 1024
+
+Running, dataset: size 2048
+the optimized matrix:
+time spent: 1.3988e+06us
+the avx optimized matrix:
+time spent: 171276us
+Passed, dataset: size 2048
+```
+
+最后提速达到了1000倍，对于最后的2048规模的矩阵来说。
 

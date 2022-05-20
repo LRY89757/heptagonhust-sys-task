@@ -88,3 +88,68 @@ time spent: 1.44036e+06us
 time spent: 4.30384e+07us
 Passed, dataset: size 2048
 
+
+最终的对比图：
+lry@ubuntu ~/p/r/task3-gemm (main)> make && make run
+g++ main.cpp -o gemm -fopenmp -O0 -Wall -Werror -std=c++11 
+./gemm
+Running, dataset: size 256
+the origin matrix:
+time spent: 163668us
+the optimized matrix:
+time spent: 16504us
+Passed, dataset: size 256
+
+Running, dataset: size 512
+the origin matrix:
+time spent: 1.38222e+06us
+the optimized matrix:
+time spent: 33839us
+Passed, dataset: size 512
+
+Running, dataset: size 1024
+the origin matrix:
+time spent: 6.57885e+07us
+the optimized matrix:
+time spent: 200592us
+Passed, dataset: size 1024
+
+Running, dataset: size 2048
+the origin matrix:
+time spent: 9.34125e+08us
+the optimized matrix:
+time spent: 1.96578e+06us
+Passed, dataset: size 2048
+
+after use AVX
+
+lry@ubuntu ~/p/r/task3-gemm (main) [2]> make && make run
+g++ main.cpp -o gemm -fopenmp -mavx -mavx2 -mfma -msse -msse2 -msse3 -mavx512bw -mavx512vl -mavx512f -mavx512cd -mavx512dq -O0 -Wall -Werror -std=c++11 
+./gemm
+Running, dataset: size 256
+the optimized matrix:
+time spent: 17935us
+the avx optimized matrix:
+time spent: 8839us
+Passed, dataset: size 256
+
+Running, dataset: size 512
+the optimized matrix:
+time spent: 37948us
+the avx optimized matrix:
+time spent: 14630us
+Passed, dataset: size 512
+
+Running, dataset: size 1024
+the optimized matrix:
+time spent: 197011us
+the avx optimized matrix:
+time spent: 34545us
+Passed, dataset: size 1024
+
+Running, dataset: size 2048
+the optimized matrix:
+time spent: 1.3988e+06us
+the avx optimized matrix:
+time spent: 171276us
+Passed, dataset: size 2048
