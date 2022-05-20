@@ -1,5 +1,59 @@
 # Main idea
 
+## 最终优化效果
+
+**访存+openmp+AVX512**
+
+| 规模 | Origin(us)  | Optimized(us) | 加速比px |
+| ---- | ----------- | ------------- | -------- |
+| 256  | 11439       | 8689          | 1.3165   |
+| 512  | 1.32082e+06 | 14776         | 89.390   |
+| 1024 | 6.33704e+07 | 31288         | 2025.390 |
+| 2048 | 5.41125e+08 | 176269        | 3069.882 |
+
+```sh
+lry@ubuntu ~/p/r/task3-gemm (main)> make && make run
+g++ main.cpp -o gemm -fopenmp -mavx -mavx2 -mfma -msse -msse2 -msse3 -mavx512bw -mavx512vl -mavx512f -mavx512cd -mavx512dq -O0 -Wall -Werror -std=c++11 
+./gemm
+Running, dataset: size 256
+the origin matrix:
+time spent: 111439us
+the optimized matrix:
+time spent: 19364us
+the avx optimized matrix:
+time spent: 8689us
+Passed, dataset: size 256
+
+Running, dataset: size 512
+the origin matrix:
+time spent: 1.32082e+06us
+the optimized matrix:
+time spent: 37924us
+the avx optimized matrix:
+time spent: 14776us
+Passed, dataset: size 512
+
+Running, dataset: size 1024
+the origin matrix:
+time spent: 6.33704e+07us
+the optimized matrix:
+time spent: 192466us
+the avx optimized matrix:
+time spent: 31288us
+Passed, dataset: size 1024
+
+Running, dataset: size 2048
+the origin matrix:
+time spent: 5.41125e+08us
+the optimized matrix:
+time spent: 1.34203e+06us
+the avx optimized matrix:
+time spent: 176269us
+Passed, dataset: size 2048
+```
+
+
+
 ## Reference
 ### Cuda
 初步思路是使用Cuda来加速这个矩阵。
@@ -54,7 +108,9 @@ Virtualization:                  VT-x
 NUMA node0 CPU(s):               0-19
 cpu更为详细信息请看[cpuinfo](./cpuinfo.log)
 
-原始效果：
+
+
+## 原始效果
 ```sh
 (base) lry@ubuntu:~/projects/recruitment-2022-spring/task3-gemm$ make run
 ./gemm
@@ -378,5 +434,5 @@ time spent: 171276us
 Passed, dataset: size 2048
 ```
 
-最后提速达到了1000倍，对于最后的2048规模的矩阵来说。
+最后提速达到了1000+倍，对于最后的2048规模的矩阵来说。
 
