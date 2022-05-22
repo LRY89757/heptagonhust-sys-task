@@ -10,6 +10,8 @@
 #include <numeric> 
 #include <cuda_runtime.h>
 
+// nvcc main.cu -o cumain && sudo nvprof ./cumain
+
 #define PRINT_TIME(code) do { \
     auto start = system_clock::now(); \
     code \
@@ -38,7 +40,7 @@ __global__ void Gemm(const int &size, const int *a, const int *b, int *c)
         for(int i = 0; i < K; ++i){
             ans += a[ty * K + i] * b[i * N + tx];  // 1 FMA, 2 load, 计算访存比太低
         }
-        // c[ty * N + tx] = ans;
+        c[ty * N + tx] = ans;
         
         // c[1] = C;
         // C = 1;
